@@ -52,7 +52,7 @@ fun SplashBody() {
     val localPassword : String? = sharedPreferences.getString("password","")
 
     LaunchedEffect(Unit) {
-        delay(3000)
+        delay(5000)
         if(localEmail.toString().isEmpty()){
             val intent = Intent(context, LoginActivity::class.java)
             context.startActivity(intent)

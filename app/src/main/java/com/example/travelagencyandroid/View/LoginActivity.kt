@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -119,26 +120,58 @@ fun LoginBody() {
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Checkbox(
-                    checked = rememberMe,
-                    onCheckedChange = { rememberMe = it },
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = Color(0xFF4CAF50),
-                        uncheckedColor = Color.White,
-                        checkmarkColor = Color.White
+                Box(
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .size(20.dp)
+                        .border(1.dp, Color.Black)
+                ) {
+                    Checkbox(
+                        checked = rememberMe,
+                        onCheckedChange = { rememberMe = it },
+                        modifier = Modifier.fillMaxSize(),
+                        colors = CheckboxDefaults.colors(
+                            checkedColor = Color.Black,
+                            uncheckedColor = Color.Transparent,
+                            checkmarkColor = Color.White
+                        )
                     )
-                )
+                }
+
                 Text(
                     text = "Remember Me",
                     color = Color(0xFF3E3E3E),
                     style = MaterialTheme.typography.bodyMedium
                 )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                TextButton(onClick = {
+                    Toast.makeText(context, "Forgot Password Clicked", Toast.LENGTH_SHORT).show()
+                }) {
+                    Text(
+                        text = "Forgot Password?",
+                        color = Color.Black,
+                        fontSize = 14.sp
+                    )
+                }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(8.dp)) // Reduced height for closeness
+
+            TextButton(onClick = {
+                Toast.makeText(context, "Register Clicked", Toast.LENGTH_SHORT).show()
+            }) {
+                Text(
+                    text = "Don't have an account? Register here",
+                    color = Color.Black,
+                    fontSize = 14.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(8.dp)) // Less space before button
 
             Button(
                 onClick = {

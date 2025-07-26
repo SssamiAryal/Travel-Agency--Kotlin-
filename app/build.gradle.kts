@@ -42,12 +42,11 @@ android {
     }
 
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.4.3"  // Adjust to your Compose compiler version
+        kotlinCompilerExtensionVersion = "1.4.3"
     }
 }
 
 dependencies {
-
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -61,6 +60,10 @@ dependencies {
 
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.ui)
+
+    // Firebase Auth dependency
+    implementation("com.google.firebase:firebase-auth:22.3.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
@@ -71,3 +74,6 @@ dependencies {
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
 }
+
+// Apply Google services plugin at the bottom
+apply(plugin = "com.google.gms.google-services")
