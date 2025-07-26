@@ -14,7 +14,7 @@
         android:theme="@style/Theme.TravelAgencyAndroid"
         tools:targetApi="31">
         <activity
-            android:name=".View.RegistrationActivity"
+            android:name=".View.RegisterActivity"
             android:exported="true"
             android:label="@string/title_activity_registration"
             android:theme="@style/Theme.TravelAgencyAndroid">

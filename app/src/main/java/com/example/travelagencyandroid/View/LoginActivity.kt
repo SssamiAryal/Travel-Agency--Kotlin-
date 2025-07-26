@@ -1,5 +1,6 @@
 package com.example.travelagencyandroid.View
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -32,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
 import com.example.travelagencyandroid.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,12 +50,13 @@ class LoginActivity : ComponentActivity() {
 
 @Composable
 fun LoginBody() {
+    val context = LocalContext.current
+    val auth = Firebase.auth
+
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
-
-    val context = LocalContext.current
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -122,23 +126,17 @@ fun LoginBody() {
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Box(
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .size(20.dp)
-                        .border(1.dp, Color.Black)
-                ) {
-                    Checkbox(
-                        checked = rememberMe,
-                        onCheckedChange = { rememberMe = it },
-                        modifier = Modifier.fillMaxSize(),
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = Color.Black,
-                            uncheckedColor = Color.Transparent,
-                            checkmarkColor = Color.White
-                        )
+                Checkbox(
+                    checked = rememberMe,
+                    onCheckedChange = { rememberMe = it },
+                    colors = CheckboxDefaults.colors(
+                        checkedColor = Color.Black,
+                        uncheckedColor = Color.Gray,
+                        checkmarkColor = Color.White
                     )
-                }
+                )
+
+                Spacer(modifier = Modifier.width(8.dp))
 
                 Text(
                     text = "Remember Me",
@@ -159,10 +157,11 @@ fun LoginBody() {
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp)) // Reduced height for closeness
+            Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = {
-                Toast.makeText(context, "Register Clicked", Toast.LENGTH_SHORT).show()
+                // Navigate to Register screen
+                context.startActivity(Intent(context, RegisterActivity::class.java))
             }) {
                 Text(
                     text = "Don't have an account? Register here",
@@ -171,15 +170,28 @@ fun LoginBody() {
                 )
             }
 
-            Spacer(modifier = Modifier.height(8.dp)) // Less space before button
+            Spacer(modifier = Modifier.height(8.dp))
 
             Button(
                 onClick = {
-                    Toast.makeText(
-                        context,
-                        "Login clicked\nEmail: $username\nPassword: $password\nRemember Me: $rememberMe",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    if (username.isNotEmpty() && password.length >= 6) {
+                        auth.signInWithEmailAndPassword(username, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                                    // Navigate to Dashboard
+                                    context.startActivity(Intent(context, DashboardActivity::class.java))
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Login Failed: ${task.exception?.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                    } else {
+                        Toast.makeText(context, "Enter valid email and password (6+ chars)", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -188,6 +200,7 @@ fun LoginBody() {
         }
     }
 }
+
 
 @Preview(showBackground = true)
 @Composable

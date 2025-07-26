@@ -4,29 +4,45 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.*
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.elevatedCardElevation
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.travelagencyandroid.R
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class DashboardActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,9 +60,11 @@ class DashboardActivity : ComponentActivity() {
 @Composable
 fun DashboardScreen() {
     val destinations = listOf(
-        Triple("Paris", "The City of Light – Starting at \$799", R.drawable.paris),
-        Triple("Maldives", "Tropical luxury – From \$999", R.drawable.maldives),
-        Triple("Tokyo", "Modern meets tradition – \$899", R.drawable.tokyo)
+        Triple("Paris", "City of Light – from \$799", R.drawable.paris),
+        Triple("Maldives", "Tropical escape – from \$999", R.drawable.maldives),
+        Triple("Tokyo", "Culture meets modern – from \$899", R.drawable.tokyo),
+        Triple("New York", "The city that never sleeps – from \$849", R.drawable.newyork),
+        Triple("Rome", "Historic wonders – from \$699", R.drawable.rome)
     )
 
     Scaffold(
@@ -54,144 +72,250 @@ fun DashboardScreen() {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "JourneyTrekker",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        text = "🌍 JourneyTrekker",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = Color.White
                     )
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF00695C),
-                    scrolledContainerColor = Color(0xFF004D40),
+                    containerColor = Color(0xFF004D40),
+                    scrolledContainerColor = Color(0xFF00251A)
                 ),
-                modifier = Modifier.shadow(8.dp)
+                modifier = Modifier.shadow(12.dp)
             )
         },
-        content = { innerPadding ->
-            LazyColumn(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .fillMaxSize()
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color(0xFFE0F2F1), Color.White)
-                        )
-                    )
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(20.dp)
-            ) {
-                item {
-                    Text(
-                        text = "Explore the World with Us!",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = Color(0xFF004D40),
-                        modifier = Modifier.padding(bottom = 12.dp)
-                    )
-                }
+        containerColor = Color(0xFFF0F5F5)
+    ) { paddingValues ->
 
-                item {
-                    Image(
-                        painter = painterResource(id = R.drawable.banner),
-                        contentDescription = "Banner Image",
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(200.dp)
-                            .shadow(10.dp, RoundedCornerShape(16.dp))
-                            .clip(RoundedCornerShape(16.dp))
-                    )
-                }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(horizontal = 16.dp, vertical = 20.dp)
+        ) {
+            Text(
+                "Explore the World With Us!",
+                fontSize = 30.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = Color(0xFF00332E)
+            )
 
-                item {
-                    Text(
-                        text = "Popular Destinations",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF00796B),
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
+            Spacer(Modifier.height(16.dp))
 
-                items(destinations) { (title, desc, imageRes) ->
-                    DestinationCard(title, desc, imageRes)
-                }
+            BannerImage()
 
-                item {
-                    Button(
-                        onClick = { /* TODO: Navigate to booking */ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 24.dp)
-                            .height(56.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF00796B),
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text(
-                            "Book Your Trip",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-            }
+            Spacer(Modifier.height(28.dp))
+
+            Text(
+                "✈ Featured Packages",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF00695C),
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            FeaturedPackagesCarousel(destinations)
+
+            Spacer(Modifier.height(32.dp))
+
+            Text(
+                "🌟 Popular Destinations",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF004D40)
+            )
+
+            Spacer(Modifier.height(16.dp))
+
+            DestinationsList(destinations)
+
+            Spacer(Modifier.height(32.dp))
+
+            BookTripButton()
         }
-    )
+    }
 }
 
 @Composable
-fun DestinationCard(title: String, description: String, imageRes: Int) {
+fun BannerImage() {
     Card(
-        shape = RoundedCornerShape(18.dp),
-        elevation = elevatedCardElevation(8.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .shadow(15.dp, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        elevation = elevatedCardElevation(15.dp)
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.banner),
+            contentDescription = "Travel banner",
+            contentScale = ContentScale.Crop,
+        )
+    }
+}
+
+@Composable
+fun FeaturedPackagesCarousel(destinations: List<Triple<String, String, Int>>) {
+    val coroutineScope = rememberCoroutineScope()
+    val listState = rememberLazyListState()
+    var currentIndex by remember { mutableStateOf(0) }
+
+    // Auto-scroll every 4 seconds
+    LaunchedEffect(currentIndex) {
+        delay(4000)
+        currentIndex = (currentIndex + 1) % destinations.size
+        coroutineScope.launch {
+            listState.animateScrollToItem(currentIndex)
+        }
+    }
+
+    LazyRow(
+        state = listState,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
         modifier = Modifier.fillMaxWidth()
     ) {
-        Box(
-            modifier = Modifier
-                .height(180.dp)
-                .fillMaxWidth()
-        ) {
-            Image(
-                painter = painterResource(id = imageRes),
-                contentDescription = "$title Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(RoundedCornerShape(18.dp))
-            )
+        itemsIndexed(destinations) { index, (title, desc, img) ->
+            val isSelected = index == currentIndex
 
+            FeaturedPackageCard(
+                title = title,
+                description = desc,
+                imageRes = img,
+                scale = if (isSelected) 1.05f else 0.9f,
+                shadow = if (isSelected) 16.dp else 6.dp
+            )
+        }
+    }
+}
+
+@Composable
+fun FeaturedPackageCard(
+    title: String,
+    description: String,
+    imageRes: Int,
+    scale: Float,
+    shadow: Dp
+) {
+    val scaleAnim by animateFloatAsState(targetValue = scale, animationSpec = tween(600))
+    Card(
+        modifier = Modifier
+            .width(280.dp)
+            .height(160.dp)
+            .graphicsLayer(scaleX = scaleAnim, scaleY = scaleAnim)
+            .shadow(shadow, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        elevation = elevatedCardElevation(shadow)
+    ) {
+        Box {
+            Image(
+                painter = painterResource(imageRes),
+                contentDescription = "$title image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color(0xAA000000)),
-                            startY = 100f
+                            colors = listOf(Color.Transparent, Color(0xCC004D40)),
+                            startY = 80f
                         )
                     )
             )
-
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .padding(16.dp)
             ) {
-                Text(
-                    text = title,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 20.sp,
-                )
-                Text(
-                    text = description,
-                    color = Color.White,
-                    fontSize = 14.sp,
-                )
+                Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 22.sp)
+                Text(description, color = Color.White, fontSize = 14.sp)
             }
         }
+    }
+}
+
+@Composable
+fun DestinationsList(destinations: List<Triple<String, String, Int>>) {
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+        modifier = Modifier.fillMaxHeight(0.5f) // half screen height scroll area
+    ) {
+        items(destinations) { (title, desc, img) ->
+            DestinationCard(title, desc, img)
+        }
+    }
+}
+
+@Composable
+fun DestinationCard(title: String, description: String, imageRes: Int) {
+    var visible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        visible = true
+    }
+
+    AnimatedVisibility(
+        visible = visible,
+        enter = fadeIn(animationSpec = tween(700)),
+        exit = fadeOut(animationSpec = tween(700))
+    ) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(180.dp)
+                .shadow(10.dp, RoundedCornerShape(20.dp)),
+            elevation = elevatedCardElevation(10.dp)
+        ) {
+            Box {
+                Image(
+                    painter = painterResource(imageRes),
+                    contentDescription = "$title Image",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(Color.Transparent, Color(0xDD000000)),
+                                startY = 150f
+                            )
+                        )
+                )
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(20.dp)
+                ) {
+                    Text(title, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                    Text(description, color = Color.White, fontSize = 14.sp)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun BookTripButton() {
+    Button(
+        onClick = { /* TODO: Navigate to booking */ },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(56.dp)
+            .shadow(8.dp, RoundedCornerShape(16.dp)),
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
+    ) {
+        Text(
+            text = "Book Your Trip Now",
+            color = Color.White,
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp
+        )
     }
 }
 

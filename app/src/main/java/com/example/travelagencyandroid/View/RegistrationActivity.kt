@@ -1,5 +1,6 @@
 package com.example.travelagencyandroid.View
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -25,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
 import com.example.travelagencyandroid.R
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,6 +46,7 @@ class RegisterActivity : ComponentActivity() {
 @Composable
 fun RegisterScreen(innerPaddingValues: PaddingValues) {
     val context = LocalContext.current
+    val auth = Firebase.auth
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -68,7 +72,7 @@ fun RegisterScreen(innerPaddingValues: PaddingValues) {
                 .padding(innerPaddingValues)
                 .padding(horizontal = 16.dp)
                 .fillMaxWidth()
-                .padding(top = 150.dp), // moved lower
+                .padding(top = 150.dp),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -163,7 +167,24 @@ fun RegisterScreen(innerPaddingValues: PaddingValues) {
 
             Button(
                 onClick = {
-                    Toast.makeText(context, "Register button clicked", Toast.LENGTH_SHORT).show()
+                    if (email.isNotEmpty() && password.length >= 6) {
+                        auth.createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(context, "Registration Successful", Toast.LENGTH_SHORT).show()
+                                    // After registration, navigate to Login screen:
+                                    context.startActivity(Intent(context, LoginActivity::class.java))
+                                } else {
+                                    Toast.makeText(
+                                        context,
+                                        "Registration Failed: ${task.exception?.message}",
+                                        Toast.LENGTH_LONG
+                                    ).show()
+                                }
+                            }
+                    } else {
+                        Toast.makeText(context, "Enter valid email and password (6+ chars)", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
@@ -173,6 +194,8 @@ fun RegisterScreen(innerPaddingValues: PaddingValues) {
     }
 }
 
+
+
 @Preview(showBackground = true)
 @Composable
 fun RegisterPreview() {
@@ -180,3 +203,4 @@ fun RegisterPreview() {
         RegisterScreen(PaddingValues(0.dp))
     }
 }
+
