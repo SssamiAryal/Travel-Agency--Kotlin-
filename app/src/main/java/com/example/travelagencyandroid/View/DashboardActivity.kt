@@ -5,36 +5,32 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.*
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.elevatedCardElevation
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -56,7 +52,7 @@ class DashboardActivity : ComponentActivity() {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun DashboardScreen() {
     val destinations = listOf(
@@ -66,6 +62,8 @@ fun DashboardScreen() {
         Triple("New York", "The city that never sleeps – from \$849", R.drawable.newyork),
         Triple("Rome", "Historic wonders – from \$699", R.drawable.rome)
     )
+
+    val listState = rememberLazyListState()
 
     Scaffold(
         topBar = {
@@ -84,55 +82,76 @@ fun DashboardScreen() {
                 modifier = Modifier.shadow(12.dp)
             )
         },
-        containerColor = Color(0xFFF0F5F5)
+        containerColor = Color(0xFFF0F5F5),
+        bottomBar = {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp)
+                    .shadow(10.dp, RoundedCornerShape(20.dp))
+            ) {
+                BookTripButton()
+            }
+        }
     ) { paddingValues ->
 
-        Column(
+        LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 20.dp)
+                .padding(paddingValues),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(bottom = 80.dp) // to avoid bottom bar overlap
         ) {
-            Text(
-                "Explore the World With Us!",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF00332E)
-            )
+            item {
+                Text(
+                    "Explore the World With Us!",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF00332E),
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
+            }
 
-            Spacer(Modifier.height(16.dp))
+            item { BannerImage() }
 
-            BannerImage()
+            stickyHeader {
+                Surface(
+                    color = Color(0xFFF0F5F5),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "✈ Featured Packages",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF00695C),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
 
-            Spacer(Modifier.height(28.dp))
+            item {
+                FeaturedPackagesCarousel(destinations)
+            }
 
-            Text(
-                "✈ Featured Packages",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF00695C),
-            )
+            stickyHeader {
+                Surface(
+                    color = Color(0xFFF0F5F5),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(
+                        "🌟 Popular Destinations",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF004D40),
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
 
-            Spacer(Modifier.height(12.dp))
-
-            FeaturedPackagesCarousel(destinations)
-
-            Spacer(Modifier.height(32.dp))
-
-            Text(
-                "🌟 Popular Destinations",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF004D40)
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            DestinationsList(destinations)
-
-            Spacer(Modifier.height(32.dp))
-
-            BookTripButton()
+            items(destinations) { (title, desc, img) ->
+                DestinationCard(title, desc, img)
+            }
         }
     }
 }
@@ -143,6 +162,7 @@ fun BannerImage() {
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp)
+            .padding(horizontal = 16.dp)
             .shadow(15.dp, RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
         elevation = elevatedCardElevation(15.dp)
@@ -161,7 +181,6 @@ fun FeaturedPackagesCarousel(destinations: List<Triple<String, String, Int>>) {
     val listState = rememberLazyListState()
     var currentIndex by remember { mutableStateOf(0) }
 
-    // Auto-scroll every 4 seconds
     LaunchedEffect(currentIndex) {
         delay(4000)
         currentIndex = (currentIndex + 1) % destinations.size
@@ -173,7 +192,9 @@ fun FeaturedPackagesCarousel(destinations: List<Triple<String, String, Int>>) {
     LazyRow(
         state = listState,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
     ) {
         itemsIndexed(destinations) { index, (title, desc, img) ->
             val isSelected = index == currentIndex
@@ -237,18 +258,6 @@ fun FeaturedPackageCard(
 }
 
 @Composable
-fun DestinationsList(destinations: List<Triple<String, String, Int>>) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = Modifier.fillMaxHeight(0.5f) // half screen height scroll area
-    ) {
-        items(destinations) { (title, desc, img) ->
-            DestinationCard(title, desc, img)
-        }
-    }
-}
-
-@Composable
 fun DestinationCard(title: String, description: String, imageRes: Int) {
     var visible by remember { mutableStateOf(false) }
 
@@ -266,6 +275,7 @@ fun DestinationCard(title: String, description: String, imageRes: Int) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(180.dp)
+                .padding(horizontal = 16.dp)
                 .shadow(10.dp, RoundedCornerShape(20.dp)),
             elevation = elevatedCardElevation(10.dp)
         ) {
@@ -305,8 +315,7 @@ fun BookTripButton() {
         onClick = { /* TODO: Navigate to booking */ },
         modifier = Modifier
             .fillMaxWidth()
-            .height(56.dp)
-            .shadow(8.dp, RoundedCornerShape(16.dp)),
+            .height(56.dp),
         shape = RoundedCornerShape(16.dp),
         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
     ) {
