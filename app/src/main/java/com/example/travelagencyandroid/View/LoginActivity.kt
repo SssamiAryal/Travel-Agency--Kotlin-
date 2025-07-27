@@ -7,7 +7,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
@@ -147,7 +146,7 @@ fun LoginBody() {
                 Spacer(modifier = Modifier.weight(1f))
 
                 TextButton(onClick = {
-                    Toast.makeText(context, "Forgot Password Clicked", Toast.LENGTH_SHORT).show()
+                    context.startActivity(Intent(context, ForgetPasswordActivity::class.java))
                 }) {
                     Text(
                         text = "Forgot Password?",
@@ -160,7 +159,6 @@ fun LoginBody() {
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = {
-                // Navigate to Register screen
                 context.startActivity(Intent(context, RegisterActivity::class.java))
             }) {
                 Text(
@@ -179,7 +177,6 @@ fun LoginBody() {
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                                    // Navigate to Dashboard
                                     context.startActivity(Intent(context, DashboardActivity::class.java))
                                 } else {
                                     Toast.makeText(
@@ -200,7 +197,6 @@ fun LoginBody() {
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable
