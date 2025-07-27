@@ -214,7 +214,7 @@ fun BookingScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
 
-            // Going Date with DatePicker and calendar icon
+
             OutlinedTextField(
                 value = goingDate,
                 onValueChange = { goingDate = it },
