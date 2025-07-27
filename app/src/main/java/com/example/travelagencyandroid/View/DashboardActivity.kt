@@ -7,6 +7,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -62,6 +63,8 @@ class DashboardActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(onLogout: () -> Unit) {
+    val context = LocalContext.current
+
     val destinations = listOf(
         Triple("Paris", "City of Light – from \$799", R.drawable.paris),
         Triple("Maldives", "Tropical escape – from \$999", R.drawable.maldives),
@@ -74,12 +77,20 @@ fun DashboardScreen(onLogout: () -> Unit) {
     val scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
 
+    // Track the index of selected destination; default to first
+    var selectedIndex by remember { mutableStateOf(0) }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
                 Spacer(Modifier.height(24.dp))
-                Text("Menu", modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(
+                    "Menu",
+                    modifier = Modifier.padding(16.dp),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
                 NavigationDrawerItem(label = { Text("Home") }, selected = false, onClick = {})
                 NavigationDrawerItem(label = { Text("My Bookings") }, selected = false, onClick = {})
                 NavigationDrawerItem(label = { Text("Notifications") }, selected = false, onClick = {})
@@ -173,10 +184,28 @@ fun DashboardScreen(onLogout: () -> Unit) {
                         color = Color(0xFF004D40)
                     )
                 }
-                items(destinations) { (title, desc, img) ->
-                    DestinationCard(title, desc, img)
+                itemsIndexed(destinations) { index, (title, desc, img) ->
+                    DestinationCard(
+                        title = title,
+                        description = desc,
+                        imageRes = img,
+                        isSelected = (index == selectedIndex),
+                        onClick = {
+                            selectedIndex = index
+                        }
+                    )
                 }
-                item { BookTripButton() }
+                item {
+                    BookTripButton {
+                        val (title, desc, img) = destinations[selectedIndex]
+                        val intent = Intent(context, BookingActivity::class.java).apply {
+                            putExtra("destination_name", title)
+                            putExtra("destination_desc", desc)
+                            putExtra("destination_image", img)
+                        }
+                        context.startActivity(intent)
+                    }
+                }
             }
         }
     }
@@ -280,13 +309,23 @@ fun FeaturedPackageCard(
 }
 
 @Composable
-fun DestinationCard(title: String, description: String, imageRes: Int) {
+fun DestinationCard(
+    title: String,
+    description: String,
+    imageRes: Int,
+    isSelected: Boolean,
+    onClick: () -> Unit
+) {
+    val borderColor = if (isSelected) Color(0xFF00796B) else Color.Transparent
     Card(
         shape = RoundedCornerShape(20.dp),
         modifier = Modifier
             .fillMaxWidth()
             .height(180.dp)
-            .shadow(10.dp, RoundedCornerShape(20.dp)),
+            .shadow(10.dp, RoundedCornerShape(20.dp))
+            .clickable { onClick() }
+            .background(Color.White),
+        border = BorderStroke(4.dp, borderColor),
         elevation = elevatedCardElevation(10.dp)
     ) {
         Box {
@@ -319,9 +358,9 @@ fun DestinationCard(title: String, description: String, imageRes: Int) {
 }
 
 @Composable
-fun BookTripButton() {
+fun BookTripButton(onClick: () -> Unit) {
     Button(
-        onClick = {},
+        onClick = onClick,
         modifier = Modifier
             .fillMaxWidth()
             .height(56.dp)
