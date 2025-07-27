@@ -5,13 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -20,6 +18,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.material3.CardDefaults.elevatedCardElevation
 import androidx.compose.runtime.*
@@ -34,7 +34,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,101 +70,114 @@ fun DashboardScreen(onLogout: () -> Unit) {
         Triple("Rome", "Historic wonders – from \$699", R.drawable.rome)
     )
 
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Spacer(Modifier.height(24.dp))
+                Text("Menu", modifier = Modifier.padding(16.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                NavigationDrawerItem(label = { Text("Home") }, selected = false, onClick = {})
+                NavigationDrawerItem(label = { Text("My Bookings") }, selected = false, onClick = {})
+                NavigationDrawerItem(label = { Text("Notifications") }, selected = false, onClick = {})
+                NavigationDrawerItem(label = { Text("Contact Us") }, selected = false, onClick = {})
+                NavigationDrawerItem(label = { Text("Profile") }, selected = false, onClick = {})
+            }
+        }
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = "🌍 JourneyTrekker",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = Color.White
+                        )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = {
+                            scope.launch { drawerState.open() }
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Menu",
+                                tint = Color.White
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { expanded = !expanded }) {
+                            Image(
+                                painter = painterResource(R.drawable.ic_profile),
+                                contentDescription = "Profile",
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(CircleShape)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = expanded,
+                            onDismissRequest = { expanded = false }
+                        ) {
+                            DropdownMenuItem(
+                                text = {
+                                    Text("Logout", color = Color.Red, fontWeight = FontWeight.Bold)
+                                },
+                                onClick = {
+                                    expanded = false
+                                    onLogout()
+                                }
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color(0xFF004D40))
+                )
+            },
+            containerColor = Color(0xFFF0F5F5)
+        ) { paddingValues ->
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 16.dp, vertical = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(24.dp)
+            ) {
+                item {
                     Text(
-                        text = "🌍 JourneyTrekker",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White
+                        "Explore the World With Us!",
+                        fontSize = 30.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = Color(0xFF00332E)
                     )
-                },
-                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-                    containerColor = Color(0xFF004D40),
-                    scrolledContainerColor = Color(0xFF00251A)
-                ),
-                modifier = Modifier.shadow(12.dp),
-                actions = {
-                    IconButton(onClick = { expanded = !expanded }) {
-                        Image(
-                            painter = painterResource(R.drawable.ic_profile),
-                            contentDescription = "Profile",
-                            modifier = Modifier
-                                .size(36.dp)
-                                .clip(CircleShape)
-                        )
-                    }
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = {
-                                Text(
-                                    "Logout",
-                                    color = Color.Red,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            },
-                            onClick = {
-                                expanded = false
-                                onLogout()
-                            }
-                        )
-                    }
                 }
-            )
-        },
-        containerColor = Color(0xFFF0F5F5)
-    ) { paddingValues ->
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
-        ) {
-            item {
-                Text(
-                    "Explore the World With Us!",
-                    fontSize = 30.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = Color(0xFF00332E)
-                )
-                Spacer(Modifier.height(16.dp))
+                item { BannerImage() }
+                item {
+                    Text(
+                        "✈ Featured Packages",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF00695C),
+                    )
+                }
+                item { FeaturedPackagesCarousel(destinations) }
+                item {
+                    Text(
+                        "🌟 Popular Destinations",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF004D40)
+                    )
+                }
+                items(destinations) { (title, desc, img) ->
+                    DestinationCard(title, desc, img)
+                }
+                item { BookTripButton() }
             }
-            item { BannerImage() }
-            item { Spacer(Modifier.height(28.dp)) }
-            item {
-                Text(
-                    "✈ Featured Packages",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF00695C),
-                )
-                Spacer(Modifier.height(12.dp))
-            }
-            item { FeaturedPackagesCarousel(destinations) }
-            item { Spacer(Modifier.height(32.dp)) }
-            item {
-                Text(
-                    "🌟 Popular Destinations",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF004D40)
-                )
-                Spacer(Modifier.height(16.dp))
-            }
-            items(destinations) { (title, desc, img) ->
-                DestinationCard(title, desc, img)
-            }
-            item { Spacer(Modifier.height(32.dp)) }
-            item { BookTripButton() }
         }
     }
 }
@@ -193,6 +205,7 @@ fun FeaturedPackagesCarousel(destinations: List<Triple<String, String, Int>>) {
     val coroutineScope = rememberCoroutineScope()
     val listState = rememberLazyListState()
     var currentIndex by remember { mutableStateOf(0) }
+
     LaunchedEffect(currentIndex) {
         delay(4000)
         currentIndex = (currentIndex + 1) % destinations.size
@@ -200,6 +213,7 @@ fun FeaturedPackagesCarousel(destinations: List<Triple<String, String, Int>>) {
             listState.animateScrollToItem(currentIndex)
         }
     }
+
     LazyRow(
         state = listState,
         horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -267,48 +281,38 @@ fun FeaturedPackageCard(
 
 @Composable
 fun DestinationCard(title: String, description: String, imageRes: Int) {
-    var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        visible = true
-    }
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(animationSpec = tween(700)),
-        exit = fadeOut(animationSpec = tween(700))
+    Card(
+        shape = RoundedCornerShape(20.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(180.dp)
+            .shadow(10.dp, RoundedCornerShape(20.dp)),
+        elevation = elevatedCardElevation(10.dp)
     ) {
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(180.dp)
-                .shadow(10.dp, RoundedCornerShape(20.dp)),
-            elevation = elevatedCardElevation(10.dp)
-        ) {
-            Box {
-                Image(
-                    painter = painterResource(imageRes),
-                    contentDescription = "$title Image",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, Color(0xDD000000)),
-                                startY = 150f
-                            )
+        Box {
+            Image(
+                painter = painterResource(imageRes),
+                contentDescription = "$title Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(Color.Transparent, Color(0xDD000000)),
+                            startY = 150f
                         )
-                )
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.BottomStart)
-                        .padding(20.dp)
-                ) {
-                    Text(title, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
-                    Text(description, color = Color.White, fontSize = 14.sp)
-                }
+                    )
+            )
+            Column(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(20.dp)
+            ) {
+                Text(title, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text(description, color = Color.White, fontSize = 14.sp)
             }
         }
     }
@@ -331,13 +335,5 @@ fun BookTripButton() {
             fontWeight = FontWeight.Bold,
             fontSize = 20.sp
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DashboardPreview() {
-    TravelAgencyAndroidTheme {
-        DashboardScreen(onLogout = {})
     }
 }
