@@ -185,7 +185,7 @@ fun BookingScreen(
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
 
-            // Input fields
+
 
             OutlinedTextField(
                 value = fullName,
