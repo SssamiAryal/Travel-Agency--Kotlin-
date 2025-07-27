@@ -71,8 +71,7 @@ class BookingActivity : ComponentActivity() {
                     description = destinationDesc,
                     imageRes = destinationImage,
                     onBookClick = { fullName, email, phone, goingDate, returnDate ->
-                        // Here you can add your booking logic (e.g., send data to backend or show confirmation)
-                        // For now, just print or handle the values
+
                         println("Booking for $fullName, Email: $email, Phone: $phone, From $goingDate to $returnDate")
                     }
                 )
