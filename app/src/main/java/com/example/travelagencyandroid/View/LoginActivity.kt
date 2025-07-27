@@ -146,6 +146,7 @@ fun LoginBody() {
                 Spacer(modifier = Modifier.weight(1f))
 
                 TextButton(onClick = {
+                    // Navigate to Forget Password screen
                     context.startActivity(Intent(context, ForgetPasswordActivity::class.java))
                 }) {
                     Text(
@@ -159,6 +160,7 @@ fun LoginBody() {
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = {
+                // Navigate to Register screen
                 context.startActivity(Intent(context, RegisterActivity::class.java))
             }) {
                 Text(
@@ -177,6 +179,7 @@ fun LoginBody() {
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                                    // Navigate to Dashboard
                                     context.startActivity(Intent(context, DashboardActivity::class.java))
                                 } else {
                                     Toast.makeText(

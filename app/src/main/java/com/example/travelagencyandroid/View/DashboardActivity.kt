@@ -5,9 +5,11 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -121,40 +123,49 @@ fun DashboardScreen(onLogout: () -> Unit) {
         containerColor = Color(0xFFF0F5F5)
     ) { paddingValues ->
 
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(horizontal = 16.dp, vertical = 20.dp)
+                .padding(horizontal = 16.dp, vertical = 20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text(
-                "Explore the World With Us!",
-                fontSize = 30.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = Color(0xFF00332E)
-            )
-            Spacer(Modifier.height(16.dp))
-            BannerImage()
-            Spacer(Modifier.height(28.dp))
-            Text(
-                "✈ Featured Packages",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF00695C),
-            )
-            Spacer(Modifier.height(12.dp))
-            FeaturedPackagesCarousel(destinations)
-            Spacer(Modifier.height(32.dp))
-            Text(
-                "🌟 Popular Destinations",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF004D40)
-            )
-            Spacer(Modifier.height(16.dp))
-            DestinationsList(destinations)
-            Spacer(Modifier.height(32.dp))
-            BookTripButton()
+            item {
+                Text(
+                    "Explore the World With Us!",
+                    fontSize = 30.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = Color(0xFF00332E)
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+            item { BannerImage() }
+            item { Spacer(Modifier.height(28.dp)) }
+            item {
+                Text(
+                    "✈ Featured Packages",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF00695C),
+                )
+                Spacer(Modifier.height(12.dp))
+            }
+            item { FeaturedPackagesCarousel(destinations) }
+            item { Spacer(Modifier.height(32.dp)) }
+            item {
+                Text(
+                    "🌟 Popular Destinations",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF004D40)
+                )
+                Spacer(Modifier.height(16.dp))
+            }
+            items(destinations) { (title, desc, img) ->
+                DestinationCard(title, desc, img)
+            }
+            item { Spacer(Modifier.height(32.dp)) }
+            item { BookTripButton() }
         }
     }
 }
@@ -255,18 +266,6 @@ fun FeaturedPackageCard(
 }
 
 @Composable
-fun DestinationsList(destinations: List<Triple<String, String, Int>>) {
-    LazyColumn(
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-        modifier = Modifier.fillMaxHeight(0.5f)
-    ) {
-        items(destinations) { (title, desc, img) ->
-            DestinationCard(title, desc, img)
-        }
-    }
-}
-
-@Composable
 fun DestinationCard(title: String, description: String, imageRes: Int) {
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -274,8 +273,8 @@ fun DestinationCard(title: String, description: String, imageRes: Int) {
     }
     AnimatedVisibility(
         visible = visible,
-        enter = androidx.compose.animation.fadeIn(animationSpec = tween(700)),
-        exit = androidx.compose.animation.fadeOut(animationSpec = tween(700))
+        enter = fadeIn(animationSpec = tween(700)),
+        exit = fadeOut(animationSpec = tween(700))
     ) {
         Card(
             shape = RoundedCornerShape(20.dp),
@@ -283,7 +282,7 @@ fun DestinationCard(title: String, description: String, imageRes: Int) {
                 .fillMaxWidth()
                 .height(180.dp)
                 .shadow(10.dp, RoundedCornerShape(20.dp)),
-            elevation =elevatedCardElevation(10.dp)
+            elevation = elevatedCardElevation(10.dp)
         ) {
             Box {
                 Image(
@@ -313,11 +312,6 @@ fun DestinationCard(title: String, description: String, imageRes: Int) {
             }
         }
     }
-}
-
-@Composable
-fun <EnterTransition> AnimatedVisibility(visible: Boolean, enter: EnterTransition, exit: ExitTransition, content: @Composable () -> Unit) {
-
 }
 
 @Composable
