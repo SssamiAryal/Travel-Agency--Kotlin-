@@ -30,10 +30,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.travelagencyandroid.R
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.example.travelagencyandroid.viewmodel.AuthViewModel
+import com.example.travelagencyandroid.viewmodel.AuthState
+import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
 
 class LoginActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,14 +49,28 @@ class LoginActivity : ComponentActivity() {
 }
 
 @Composable
-fun LoginBody() {
+fun LoginBody(authViewModel: AuthViewModel = viewModel()) {
     val context = LocalContext.current
-    val auth = Firebase.auth
 
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisibility by remember { mutableStateOf(false) }
     var rememberMe by remember { mutableStateOf(false) }
+
+    val loginState by authViewModel.loginState.collectAsState()
+
+    LaunchedEffect(loginState) {
+        when (loginState) {
+            is AuthState.Success -> {
+                Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
+                context.startActivity(Intent(context, DashboardActivity::class.java))
+            }
+            is AuthState.Error -> {
+                Toast.makeText(context, "Login Failed: ${(loginState as AuthState.Error).error}", Toast.LENGTH_LONG).show()
+            }
+            else -> {}
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -146,7 +161,6 @@ fun LoginBody() {
                 Spacer(modifier = Modifier.weight(1f))
 
                 TextButton(onClick = {
-                    // Navigate to Forget Password screen
                     context.startActivity(Intent(context, ForgetPasswordActivity::class.java))
                 }) {
                     Text(
@@ -160,7 +174,6 @@ fun LoginBody() {
             Spacer(modifier = Modifier.height(8.dp))
 
             TextButton(onClick = {
-                // Navigate to Register screen
                 context.startActivity(Intent(context, RegisterActivity::class.java))
             }) {
                 Text(
@@ -175,20 +188,7 @@ fun LoginBody() {
             Button(
                 onClick = {
                     if (username.isNotEmpty() && password.length >= 6) {
-                        auth.signInWithEmailAndPassword(username, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    Toast.makeText(context, "Login Successful", Toast.LENGTH_SHORT).show()
-                                    // Navigate to Dashboard
-                                    context.startActivity(Intent(context, DashboardActivity::class.java))
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Login Failed: ${task.exception?.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                            }
+                        authViewModel.loginUser(username, password)
                     } else {
                         Toast.makeText(context, "Enter valid email and password (6+ chars)", Toast.LENGTH_SHORT).show()
                     }
