@@ -66,6 +66,7 @@ dependencies {
 
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation("com.google.firebase:firebase-firestore-ktx:24.7.1")
+    implementation(libs.firebase.crashlytics.buildtools)
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")

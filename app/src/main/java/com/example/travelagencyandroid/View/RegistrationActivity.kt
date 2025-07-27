@@ -24,10 +24,11 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.travelagencyandroid.viewmodel.AuthViewModel
+import com.example.travelagencyandroid.viewmodel.AuthState
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
 import com.example.travelagencyandroid.R
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
 
 class RegisterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,9 +45,11 @@ class RegisterActivity : ComponentActivity() {
 }
 
 @Composable
-fun RegisterScreen(innerPaddingValues: PaddingValues) {
+fun RegisterScreen(
+    innerPaddingValues: PaddingValues,
+    authViewModel: AuthViewModel = viewModel()
+) {
     val context = LocalContext.current
-    val auth = Firebase.auth
 
     var firstName by remember { mutableStateOf("") }
     var lastName by remember { mutableStateOf("") }
@@ -56,6 +59,22 @@ fun RegisterScreen(innerPaddingValues: PaddingValues) {
     var selectedCountry by remember { mutableStateOf("Select Country") }
     val countryOptions = listOf("Nepal", "India", "China")
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
+
+    val registerState by authViewModel.registerState.collectAsState()
+
+    // React to register state changes
+    LaunchedEffect(registerState) {
+        when (registerState) {
+            is com.example.travelagencyandroid.viewmodel.AuthState.Success -> {
+                Toast.makeText(context, "Registration Successful", Toast.LENGTH_SHORT).show()
+                context.startActivity(Intent(context, LoginActivity::class.java))
+            }
+            is com.example.travelagencyandroid.viewmodel.AuthState.Error -> {
+                Toast.makeText(context, "Registration Failed: ${(registerState as com.example.travelagencyandroid.viewmodel.AuthState.Error).error}", Toast.LENGTH_LONG).show()
+            }
+            else -> {}
+        }
+    }
 
     Box(
         modifier = Modifier.fillMaxSize()
@@ -168,20 +187,8 @@ fun RegisterScreen(innerPaddingValues: PaddingValues) {
             Button(
                 onClick = {
                     if (email.isNotEmpty() && password.length >= 6) {
-                        auth.createUserWithEmailAndPassword(email, password)
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    Toast.makeText(context, "Registration Successful", Toast.LENGTH_SHORT).show()
-                                    // After registration, navigate to Login screen:
-                                    context.startActivity(Intent(context, LoginActivity::class.java))
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        "Registration Failed: ${task.exception?.message}",
-                                        Toast.LENGTH_LONG
-                                    ).show()
-                                }
-                            }
+                        // Call ViewModel registerUser function
+                        authViewModel.registerUser(email, password, firstName, lastName, selectedCountry)
                     } else {
                         Toast.makeText(context, "Enter valid email and password (6+ chars)", Toast.LENGTH_SHORT).show()
                     }
@@ -194,8 +201,6 @@ fun RegisterScreen(innerPaddingValues: PaddingValues) {
     }
 }
 
-
-
 @Preview(showBackground = true)
 @Composable
 fun RegisterPreview() {
@@ -203,4 +208,3 @@ fun RegisterPreview() {
         RegisterScreen(PaddingValues(0.dp))
     }
 }
-
