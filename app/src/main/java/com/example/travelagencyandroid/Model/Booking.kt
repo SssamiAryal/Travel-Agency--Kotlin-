@@ -3,10 +3,11 @@ package com.example.travelagencyandroid.Model
 data class Booking(
     val bookingId: String = "",
     val userId: String = "",
-    val destinationName: String = "",
-    val destinationDescription: String = "",
+    val fullName: String = "",
+    val email: String = "",
+    val phone: String = "",
     val goingDate: String = "",
     val returnDate: String = "",
-    val travelers: Int = 1,
+    val travelers: String = "",
     val travelClass: String = ""
 )

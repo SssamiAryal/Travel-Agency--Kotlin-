@@ -2,6 +2,7 @@ package com.example.travelagencyandroid.View
 
 import android.app.DatePickerDialog
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -29,8 +30,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.travelagencyandroid.Model.Booking
 import com.example.travelagencyandroid.R
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
+import com.example.travelagencyandroid.viewmodel.BookingViewModel
+import com.google.firebase.auth.FirebaseAuth
 import java.util.*
 
 class BookingActivity : ComponentActivity() {
@@ -38,19 +43,56 @@ class BookingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        // Check if user is logged in
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        if (currentUser == null) {
+            Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show()
+            finish() // Close activity if not logged in
+            return
+        }
+
         val destinationName = intent.getStringExtra("destination_name") ?: "Unknown"
         val destinationDesc = intent.getStringExtra("destination_desc") ?: ""
         val destinationImage = intent.getIntExtra("destination_image", R.drawable.banner)
 
         setContent {
             TravelAgencyAndroidTheme {
+                val viewModel: BookingViewModel = viewModel()
+
                 BookingScreen(
                     name = destinationName,
                     description = destinationDesc,
                     imageRes = destinationImage,
                     onBackClick = { finish() },
                     onBookClick = { fullName, email, phone, goingDate, returnDate, travelers, travelClass ->
-                        println("Booking: $fullName | $email | $phone | $goingDate to $returnDate | $travelers | $travelClass")
+
+                        if (fullName.isBlank() || email.isBlank() || phone.isBlank() ||
+                            goingDate.isBlank() || returnDate.isBlank() || travelers.isBlank()
+                        ) {
+                            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show()
+                            return@BookingScreen
+                        }
+
+                        val booking = Booking(
+                            fullName = fullName,
+                            email = email,
+                            phone = phone,
+                            goingDate = goingDate,
+                            returnDate = returnDate,
+                            travelers = travelers,
+                            travelClass = travelClass
+                        )
+
+                        viewModel.submitBooking(
+                            booking,
+                            onSuccess = {
+                                Toast.makeText(this, "Booking Successful", Toast.LENGTH_SHORT).show()
+                                finish()
+                            },
+                            onFailure = { error ->
+                                Toast.makeText(this, "Booking Failed: ${error.message}", Toast.LENGTH_SHORT).show()
+                            }
+                        )
                     }
                 )
             }
@@ -238,7 +280,10 @@ fun BookingScreen(
                     readOnly = true,
                     trailingIcon = {
                         IconButton(onClick = { expanded = true }) {
-                            Icon(painter = painterResource(id = R.drawable.ic_arrow_drop_down), contentDescription = null)
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_arrow_drop_down),
+                                contentDescription = null
+                            )
                         }
                     }
                 )
@@ -262,7 +307,15 @@ fun BookingScreen(
 
             Button(
                 onClick = {
-                    onBookClick(fullName, email, phone, goingDate, returnDate, travelers, selectedTravelClass)
+                    onBookClick(
+                        fullName,
+                        email,
+                        phone,
+                        goingDate,
+                        returnDate,
+                        travelers,
+                        selectedTravelClass
+                    )
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -270,7 +323,12 @@ fun BookingScreen(
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
             ) {
-                Text("Book Now", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text(
+                    "Book Now",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 20.sp
+                )
             }
         }
     }
