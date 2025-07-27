@@ -100,7 +100,7 @@ fun BookingScreen(
     fun showDatePicker(currentDate: String, onDateSelected: (String) -> Unit) {
         val calendar = Calendar.getInstance()
 
-        // If currentDate is set, parse it and set calendar to it
+
         if (currentDate.isNotBlank()) {
             val parts = currentDate.split("-")
             if (parts.size == 3) {
