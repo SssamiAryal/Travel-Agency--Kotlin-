@@ -1,6 +1,7 @@
 package com.example.travelagencyandroid.View
 
 import android.app.DatePickerDialog
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,12 +20,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults.elevatedCardElevation
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,7 +63,6 @@ class BookingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Receive destination data from Intent
         val destinationName = intent.getStringExtra("destination_name") ?: "Unknown"
         val destinationDesc = intent.getStringExtra("destination_desc") ?: ""
         val destinationImage = intent.getIntExtra("destination_image", R.drawable.banner)
@@ -70,9 +73,10 @@ class BookingActivity : ComponentActivity() {
                     name = destinationName,
                     description = destinationDesc,
                     imageRes = destinationImage,
-                    onBookClick = { fullName, email, phone, goingDate, returnDate ->
+                    onBackClick = { finish() },
+                    onBookClick = { fullName, email, phone, goingDate, returnDate, travelers, travelClass ->
 
-                        println("Booking for $fullName, Email: $email, Phone: $phone, From $goingDate to $returnDate")
+                        println("Booking for $fullName, Email: $email, Phone: $phone, From $goingDate to $returnDate, Travelers: $travelers, Class: $travelClass")
                     }
                 )
             }
@@ -86,28 +90,38 @@ fun BookingScreen(
     name: String,
     description: String,
     imageRes: Int,
-    onBookClick: (fullName: String, email: String, phone: String, goingDate: String, returnDate: String) -> Unit
+    onBackClick: () -> Unit,
+    onBookClick: (
+        fullName: String,
+        email: String,
+        phone: String,
+        goingDate: String,
+        returnDate: String,
+        travelers: String,
+        travelClass: String
+    ) -> Unit
 ) {
     val context = LocalContext.current
 
-    // Input states
     var fullName by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
     var goingDate by remember { mutableStateOf("") }
     var returnDate by remember { mutableStateOf("") }
+    var travelers by remember { mutableStateOf("") }
+
+    val travelClasses = listOf("Economy", "Business", "First Class")
+    var expanded by remember { mutableStateOf(false) }
+    var selectedTravelClass by remember { mutableStateOf(travelClasses[0]) }
 
     fun showDatePicker(currentDate: String, onDateSelected: (String) -> Unit) {
         val calendar = Calendar.getInstance()
-
-
         if (currentDate.isNotBlank()) {
             val parts = currentDate.split("-")
             if (parts.size == 3) {
                 calendar.set(parts[0].toInt(), parts[1].toInt() - 1, parts[2].toInt())
             }
         }
-
         DatePickerDialog(
             context,
             { _, year, month, dayOfMonth ->
@@ -129,6 +143,11 @@ fun BookingScreen(
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                         color = Color.White
                     )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBackClick) {
+                        Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    }
                 },
                 colors = TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor = Color(0xFF00796B))
             )
@@ -185,8 +204,6 @@ fun BookingScreen(
                 modifier = Modifier.padding(horizontal = 8.dp)
             )
 
-
-
             OutlinedTextField(
                 value = fullName,
                 onValueChange = { fullName = it },
@@ -214,6 +231,14 @@ fun BookingScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
             )
 
+            OutlinedTextField(
+                value = travelers,
+                onValueChange = { travelers = it.filter { char -> char.isDigit() } },
+                label = { Text("Number of Travelers") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
 
             OutlinedTextField(
                 value = goingDate,
@@ -243,7 +268,6 @@ fun BookingScreen(
                 }
             )
 
-            // Return Date with DatePicker and calendar icon
             OutlinedTextField(
                 value = returnDate,
                 onValueChange = { returnDate = it },
@@ -272,11 +296,41 @@ fun BookingScreen(
                 }
             )
 
+            Box {
+                OutlinedTextField(
+                    value = selectedTravelClass,
+                    onValueChange = { },
+                    label = { Text("Travel Class") },
+                    modifier = Modifier.fillMaxWidth(),
+                    readOnly = true,
+                    trailingIcon = {
+                        IconButton(onClick = { expanded = true }) {
+                            Icon(painter = painterResource(id = R.drawable.ic_arrow_drop_down), contentDescription = "Dropdown")
+                        }
+                    }
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    travelClasses.forEach { option ->
+                        DropdownMenuItem(
+                            text = { Text(option) },
+                            onClick = {
+                                selectedTravelClass = option
+                                expanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = {
-                    onBookClick(fullName, email, phone, goingDate, returnDate)
+                    onBookClick(fullName, email, phone, goingDate, returnDate, travelers, selectedTravelClass)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -285,7 +339,7 @@ fun BookingScreen(
                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B))
             ) {
                 Text(
-                    text = "Book My Trip",
+                    text = "Book Now",
                     color = Color.White,
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
