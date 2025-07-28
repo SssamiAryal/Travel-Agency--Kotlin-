@@ -9,5 +9,7 @@ data class Booking(
     val goingDate: String = "",
     val returnDate: String = "",
     val travelers: String = "",
-    val travelClass: String = ""
+    val travelClass: String = "",
+    val destinationName: String = ""
+
 )

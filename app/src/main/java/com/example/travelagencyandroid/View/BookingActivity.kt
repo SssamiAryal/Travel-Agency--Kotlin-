@@ -80,7 +80,8 @@ class BookingActivity : ComponentActivity() {
                             goingDate = goingDate,
                             returnDate = returnDate,
                             travelers = travelers,
-                            travelClass = travelClass
+                            travelClass = travelClass,
+                            destinationName = destinationName  // <---- Added here
                         )
 
                         viewModel.submitBooking(
@@ -114,7 +115,7 @@ fun BookingScreen(
         goingDate: String,
         returnDate: String,
         travelers: String,
-        travelClass: String
+        travelClass: String,
     ) -> Unit
 ) {
     val context = LocalContext.current
