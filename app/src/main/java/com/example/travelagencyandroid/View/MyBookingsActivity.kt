@@ -19,20 +19,26 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.travelagencyandroid.Model.Booking
 import com.example.travelagencyandroid.ViewModel.BookingViewModel
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
 
 class MyBookingsActivity : ComponentActivity() {
+    private lateinit var bookingViewModel: BookingViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
+        bookingViewModel = ViewModelProvider(this)[BookingViewModel::class.java]
+
         setContent {
             TravelAgencyAndroidTheme {
                 MyBookingsScreen(
-                    onBackClick = { finish() }
+                    onBackClick = { finish() },
+                    bookingViewModel = bookingViewModel
                 )
             }
         }
@@ -43,7 +49,7 @@ class MyBookingsActivity : ComponentActivity() {
 @Composable
 fun MyBookingsScreen(
     onBackClick: () -> Unit,
-    bookingViewModel: BookingViewModel = viewModel()
+    bookingViewModel: BookingViewModel
 ) {
     val bookings by bookingViewModel.bookings.collectAsState()
     val context = LocalContext.current
@@ -108,7 +114,7 @@ fun MyBookingsScreen(
                                 onDeleteClick = {
                                     bookingViewModel.deleteBooking(
                                         booking.bookingId,
-                                        onSuccess = { bookingViewModel.loadUserBookings() },
+                                        onSuccess = { /* Already reloads in VM */ },
                                         onFailure = { /* TODO: Show error message */ }
                                     )
                                 }

@@ -21,27 +21,31 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.ViewModelProvider
 import com.example.travelagencyandroid.Model.Booking
 import com.example.travelagencyandroid.ViewModel.BookingViewModel
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
 import java.util.*
 
 class EditBookingActivity : ComponentActivity() {
+
+    private lateinit var bookingViewModel: BookingViewModel
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        bookingViewModel = ViewModelProvider(this)[BookingViewModel::class.java]
 
         val booking = intent.getParcelableExtra<Booking>("booking") ?: Booking()
 
         setContent {
             TravelAgencyAndroidTheme {
-                val viewModel: BookingViewModel = viewModel()
                 EditBookingScreen(
                     booking = booking,
                     onBackClick = { finish() },
                     onSaveClick = { updatedBooking ->
-                        viewModel.updateBooking(
+                        bookingViewModel.updateBooking(
                             updatedBooking,
                             onSuccess = { finish() },
                             onFailure = { /* TODO: Show error message */ }

@@ -9,4 +9,6 @@
     <string name="title_activity_bookin_confirm">BookinConfirm</string>
     <string name="title_activity_my_bookings">MyBookingsActivity</string>
     <string name="title_activity_edit_booking">EditBookingActivity</string>
+    <string name="title_activity_notifications">NotificationsActivity</string>
+    <string name="title_activity_contact_us">ContactUsActivity</string>
 </resources>

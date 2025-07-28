@@ -27,7 +27,10 @@ class BookingViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        repository.addBooking(booking, onSuccess, onFailure)
+        repository.addBooking(booking, {
+            loadUserBookings()
+            onSuccess()
+        }, onFailure)
     }
 
     fun updateBooking(
@@ -35,7 +38,10 @@ class BookingViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        repository.updateBooking(booking, onSuccess, onFailure)
+        repository.updateBooking(booking, {
+            loadUserBookings()
+            onSuccess()
+        }, onFailure)
     }
 
     fun deleteBooking(
@@ -43,6 +49,9 @@ class BookingViewModel : ViewModel() {
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
-        repository.deleteBooking(bookingId, onSuccess, onFailure)
+        repository.deleteBooking(bookingId, {
+            loadUserBookings()
+            onSuccess()
+        }, onFailure)
     }
 }

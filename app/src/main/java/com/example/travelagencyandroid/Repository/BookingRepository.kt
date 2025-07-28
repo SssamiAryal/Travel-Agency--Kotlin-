@@ -69,7 +69,7 @@ class BookingRepository {
                 .get()
                 .await()
 
-            snapshot.documents.map { it.toObject(Booking::class.java)!! }
+            snapshot.documents.mapNotNull { it.toObject(Booking::class.java) }
         } catch (e: Exception) {
             emptyList()
         }
