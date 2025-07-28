@@ -95,7 +95,17 @@ fun MyBookingsScreen(
                 } else {
                     LazyColumn(modifier = Modifier.padding(16.dp)) {
                         items(bookings) { booking ->
-                            BookingCard(booking)
+                            BookingCard(
+                                booking = booking,
+                                onEditClick = { /* TODO: Implement edit action */ },
+                                onDeleteClick = {
+                                    bookingViewModel.deleteBooking(
+                                        booking.bookingId,
+                                        onSuccess = { bookingViewModel.loadUserBookings() },
+                                        onFailure = { /* TODO: Show error message */ }
+                                    )
+                                }
+                            )
                             Spacer(modifier = Modifier.height(12.dp))
                         }
                     }
@@ -106,7 +116,11 @@ fun MyBookingsScreen(
 }
 
 @Composable
-fun BookingCard(booking: Booking) {
+fun BookingCard(
+    booking: Booking,
+    onEditClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text("Destination: ${booking.destinationName}", fontWeight = FontWeight.Bold)
@@ -115,6 +129,20 @@ fun BookingCard(booking: Booking) {
             Text("Phone: ${booking.phone}")
             Text("Going: ${booking.goingDate} | Return: ${booking.returnDate}")
             Text("Travelers: ${booking.travelers} | Class: ${booking.travelClass}")
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.End,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                TextButton(onClick = onEditClick) {
+                    Text("Edit")
+                }
+                TextButton(onClick = onDeleteClick) {
+                    Text("Delete", color = Color.Red)
+                }
+            }
         }
     }
 }

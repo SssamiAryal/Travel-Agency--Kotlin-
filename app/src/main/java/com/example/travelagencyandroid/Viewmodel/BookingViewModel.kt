@@ -15,7 +15,6 @@ class BookingViewModel : ViewModel() {
     private val _bookings = MutableStateFlow<List<Booking>>(emptyList())
     val bookings: StateFlow<List<Booking>> = _bookings
 
-    // Fetch user bookings from Firestore
     fun loadUserBookings() {
         viewModelScope.launch {
             val userBookings = repository.getUserBookings()
@@ -23,12 +22,27 @@ class BookingViewModel : ViewModel() {
         }
     }
 
-    // Submit a new booking
     fun submitBooking(
         booking: Booking,
         onSuccess: () -> Unit,
         onFailure: (Exception) -> Unit
     ) {
         repository.addBooking(booking, onSuccess, onFailure)
+    }
+
+    fun updateBooking(
+        booking: Booking,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        repository.updateBooking(booking, onSuccess, onFailure)
+    }
+
+    fun deleteBooking(
+        bookingId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        repository.deleteBooking(bookingId, onSuccess, onFailure)
     }
 }

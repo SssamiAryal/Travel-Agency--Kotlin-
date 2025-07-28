@@ -31,6 +31,36 @@ class BookingRepository {
             .addOnFailureListener { exception -> onFailure(exception) }
     }
 
+    fun updateBooking(
+        booking: Booking,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (booking.bookingId.isBlank()) {
+            return onFailure(Exception("Booking ID is required for update"))
+        }
+        db.collection("Bookings")
+            .document(booking.bookingId)
+            .set(booking)
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception -> onFailure(exception) }
+    }
+
+    fun deleteBooking(
+        bookingId: String,
+        onSuccess: () -> Unit,
+        onFailure: (Exception) -> Unit
+    ) {
+        if (bookingId.isBlank()) {
+            return onFailure(Exception("Booking ID is required for deletion"))
+        }
+        db.collection("Bookings")
+            .document(bookingId)
+            .delete()
+            .addOnSuccessListener { onSuccess() }
+            .addOnFailureListener { exception -> onFailure(exception) }
+    }
+
     suspend fun getUserBookings(): List<Booking> {
         val userId = auth.currentUser?.uid ?: return emptyList()
         return try {
