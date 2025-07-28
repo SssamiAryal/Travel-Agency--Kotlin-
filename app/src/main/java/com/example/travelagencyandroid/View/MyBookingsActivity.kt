@@ -1,5 +1,6 @@
 package com.example.travelagencyandroid.View
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -44,6 +46,7 @@ fun MyBookingsScreen(
     bookingViewModel: BookingViewModel = viewModel()
 ) {
     val bookings by bookingViewModel.bookings.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(Unit) {
         bookingViewModel.loadUserBookings()
@@ -97,7 +100,11 @@ fun MyBookingsScreen(
                         items(bookings) { booking ->
                             BookingCard(
                                 booking = booking,
-                                onEditClick = { /* TODO: Implement edit action */ },
+                                onEditClick = {
+                                    val intent = Intent(context, EditBookingActivity::class.java)
+                                    intent.putExtra("booking", booking)
+                                    context.startActivity(intent)
+                                },
                                 onDeleteClick = {
                                     bookingViewModel.deleteBooking(
                                         booking.bookingId,

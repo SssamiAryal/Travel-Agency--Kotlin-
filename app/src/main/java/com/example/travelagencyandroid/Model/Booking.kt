@@ -1,5 +1,9 @@
 package com.example.travelagencyandroid.Model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Booking(
     val bookingId: String = "",
     val userId: String = "",
@@ -11,5 +15,4 @@ data class Booking(
     val travelers: String = "",
     val travelClass: String = "",
     val destinationName: String = ""
-
-)
+) : Parcelable
