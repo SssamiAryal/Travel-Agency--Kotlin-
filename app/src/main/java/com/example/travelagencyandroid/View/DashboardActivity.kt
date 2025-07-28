@@ -14,7 +14,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -53,6 +52,9 @@ class DashboardActivity : ComponentActivity() {
                     onLogout = {
                         finish()
                         startActivity(Intent(this, LoginActivity::class.java))
+                    },
+                    onMyBookingsClick = {
+                        startActivity(Intent(this, MyBookingsActivity::class.java))
                     }
                 )
             }
@@ -62,7 +64,7 @@ class DashboardActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DashboardScreen(onLogout: () -> Unit) {
+fun DashboardScreen(onLogout: () -> Unit, onMyBookingsClick: () -> Unit) {
     val context = LocalContext.current
 
     val destinations = listOf(
@@ -76,8 +78,6 @@ fun DashboardScreen(onLogout: () -> Unit) {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var expanded by remember { mutableStateOf(false) }
-
-    // Track the index of selected destination; default to first
     var selectedIndex by remember { mutableStateOf(0) }
 
     ModalNavigationDrawer(
@@ -92,7 +92,10 @@ fun DashboardScreen(onLogout: () -> Unit) {
                     fontSize = 20.sp
                 )
                 NavigationDrawerItem(label = { Text("Home") }, selected = false, onClick = {})
-                NavigationDrawerItem(label = { Text("My Bookings") }, selected = false, onClick = {})
+                NavigationDrawerItem(label = { Text("My Bookings") }, selected = false, onClick = {
+                    scope.launch { drawerState.close() }
+                    onMyBookingsClick()
+                })
                 NavigationDrawerItem(label = { Text("Notifications") }, selected = false, onClick = {})
                 NavigationDrawerItem(label = { Text("Contact Us") }, selected = false, onClick = {})
                 NavigationDrawerItem(label = { Text("Profile") }, selected = false, onClick = {})

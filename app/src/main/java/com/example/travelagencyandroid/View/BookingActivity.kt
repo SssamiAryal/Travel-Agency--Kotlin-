@@ -34,7 +34,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.travelagencyandroid.Model.Booking
 import com.example.travelagencyandroid.R
 import com.example.travelagencyandroid.View.ui.theme.TravelAgencyAndroidTheme
-import com.example.travelagencyandroid.viewmodel.BookingViewModel
+import com.example.travelagencyandroid.ViewModel.BookingViewModel
 import com.google.firebase.auth.FirebaseAuth
 import java.util.*
 
@@ -43,11 +43,10 @@ class BookingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        // Check if user is logged in
         val currentUser = FirebaseAuth.getInstance().currentUser
         if (currentUser == null) {
             Toast.makeText(this, "Please login first", Toast.LENGTH_SHORT).show()
-            finish() // Close activity if not logged in
+            finish()
             return
         }
 
@@ -81,7 +80,7 @@ class BookingActivity : ComponentActivity() {
                             returnDate = returnDate,
                             travelers = travelers,
                             travelClass = travelClass,
-                            destinationName = destinationName  // <---- Added here
+                            destinationName = destinationName
                         )
 
                         viewModel.submitBooking(

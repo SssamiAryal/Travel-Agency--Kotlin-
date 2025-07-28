@@ -7,4 +7,5 @@
     <string name="title_activity_forget_password">ForgetPasswordActivity</string>
     <string name="title_activity_booking">BookingActivity</string>
     <string name="title_activity_bookin_confirm">BookinConfirm</string>
+    <string name="title_activity_my_bookings">MyBookingsActivity</string>
 </resources>
