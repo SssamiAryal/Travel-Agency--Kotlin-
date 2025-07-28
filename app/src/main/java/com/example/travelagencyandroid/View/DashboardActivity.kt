@@ -91,25 +91,80 @@ fun DashboardScreen(onLogout: () -> Unit, onMyBookingsClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
-                NavigationDrawerItem(label = { Text("Home") }, selected = false, onClick = {
-                    scope.launch { drawerState.close() }
-                })
-                NavigationDrawerItem(label = { Text("My Bookings") }, selected = false, onClick = {
-                    scope.launch { drawerState.close() }
-                    onMyBookingsClick()
-                })
-                NavigationDrawerItem(label = { Text("Notifications") }, selected = false, onClick = {
-                    scope.launch { drawerState.close() }
-                    context.startActivity(Intent(context, NotificationsActivity::class.java))
-                })
-                NavigationDrawerItem(label = { Text("Contact Us") }, selected = false, onClick = {
-                    scope.launch { drawerState.close() }
-                    context.startActivity(Intent(context, ContactUsActivity::class.java))
-                })
-                NavigationDrawerItem(label = { Text("Profile") }, selected = false, onClick = {
-                    scope.launch { drawerState.close() }
-                    // TODO: Navigate to Profile Activity if exists
-                })
+                NavigationDrawerItem(
+                    label = { Text("Home") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                    },
+                    icon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.home),
+                            contentDescription = "Home Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                )
+                NavigationDrawerItem(
+                    label = { Text("My Bookings") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onMyBookingsClick()
+                    },
+                    icon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.booking),
+                            contentDescription = "Booking Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Notifications") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        context.startActivity(Intent(context, NotificationsActivity::class.java))
+                    },
+                    icon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.notification),
+                            contentDescription = "Notification Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Contact Us") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        context.startActivity(Intent(context, ContactUsActivity::class.java))
+                    },
+                    icon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.contact),
+                            contentDescription = "Contact Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                )
+                NavigationDrawerItem(
+                    label = { Text("Profile") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        // TODO: Navigate to Profile Activity if exists
+                    },
+                    icon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.profile),
+                            contentDescription = "Profile Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                )
             }
         }
     ) {
@@ -136,13 +191,20 @@ fun DashboardScreen(onLogout: () -> Unit, onMyBookingsClick: () -> Unit) {
                     },
                     actions = {
                         IconButton(onClick = { expanded = !expanded }) {
-                            Image(
-                                painter = painterResource(R.drawable.ic_profile),
-                                contentDescription = "Profile",
+                            // Circle background around the logout icon
+                            Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(40.dp)
                                     .clip(CircleShape)
-                            )
+                                    .background(Color(0x22000000)), // subtle translucent black circle
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Image(
+                                    painter = painterResource(R.drawable.logout),
+                                    contentDescription = "Logout",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                         DropdownMenu(
                             expanded = expanded,
