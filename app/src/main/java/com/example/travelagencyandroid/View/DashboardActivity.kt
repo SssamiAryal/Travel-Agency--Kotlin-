@@ -91,14 +91,25 @@ fun DashboardScreen(onLogout: () -> Unit, onMyBookingsClick: () -> Unit) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 20.sp
                 )
-                NavigationDrawerItem(label = { Text("Home") }, selected = false, onClick = {})
+                NavigationDrawerItem(label = { Text("Home") }, selected = false, onClick = {
+                    scope.launch { drawerState.close() }
+                })
                 NavigationDrawerItem(label = { Text("My Bookings") }, selected = false, onClick = {
                     scope.launch { drawerState.close() }
                     onMyBookingsClick()
                 })
-                NavigationDrawerItem(label = { Text("Notifications") }, selected = false, onClick = {})
-                NavigationDrawerItem(label = { Text("Contact Us") }, selected = false, onClick = {})
-                NavigationDrawerItem(label = { Text("Profile") }, selected = false, onClick = {})
+                NavigationDrawerItem(label = { Text("Notifications") }, selected = false, onClick = {
+                    scope.launch { drawerState.close() }
+                    context.startActivity(Intent(context, NotificationsActivity::class.java))
+                })
+                NavigationDrawerItem(label = { Text("Contact Us") }, selected = false, onClick = {
+                    scope.launch { drawerState.close() }
+                    context.startActivity(Intent(context, ContactUsActivity::class.java))
+                })
+                NavigationDrawerItem(label = { Text("Profile") }, selected = false, onClick = {
+                    scope.launch { drawerState.close() }
+                    // TODO: Navigate to Profile Activity if exists
+                })
             }
         }
     ) {
