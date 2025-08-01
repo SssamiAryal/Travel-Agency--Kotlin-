@@ -68,6 +68,10 @@ fun DashboardScreen(onLogout: () -> Unit, onMyBookingsClick: () -> Unit) {
     val context = LocalContext.current
 
     val destinations = listOf(
+        Triple("India", "Incredible culture & diversity – from \$499", R.drawable.india),
+        Triple("China", "Great Wall adventures – from \$899", R.drawable.china),
+        Triple("UK", "Royal experiences – from \$999", R.drawable.uk),
+        Triple("Dubai", "Luxury in the desert – from \$1099", R.drawable.dubai),
         Triple("Paris", "City of Light – from \$799", R.drawable.paris),
         Triple("Maldives", "Tropical escape – from \$999", R.drawable.maldives),
         Triple("Tokyo", "Culture meets modern – from \$899", R.drawable.tokyo),
@@ -151,11 +155,25 @@ fun DashboardScreen(onLogout: () -> Unit, onMyBookingsClick: () -> Unit) {
                     }
                 )
                 NavigationDrawerItem(
+                    label = { Text("About Us") },  // <-- Added About Us here
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        context.startActivity(Intent(context, AboutUsActivity::class.java))
+                    },
+                    icon = {
+                        Image(
+                            painter = painterResource(id = R.drawable.about),
+                            contentDescription = "About Us Icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
+                )
+                NavigationDrawerItem(
                     label = { Text("Profile") },
                     selected = false,
                     onClick = {
                         scope.launch { drawerState.close() }
-                        // TODO: Navigate to Profile Activity if exists
                     },
                     icon = {
                         Image(
@@ -191,12 +209,12 @@ fun DashboardScreen(onLogout: () -> Unit, onMyBookingsClick: () -> Unit) {
                     },
                     actions = {
                         IconButton(onClick = { expanded = !expanded }) {
-                            // Circle background around the logout icon
+
                             Box(
                                 modifier = Modifier
                                     .size(40.dp)
                                     .clip(CircleShape)
-                                    .background(Color(0x22000000)), // subtle translucent black circle
+                                    .background(Color(0x22000000)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Image(
@@ -300,7 +318,8 @@ fun BannerImage() {
         Image(
             painter = painterResource(id = R.drawable.banner),
             contentDescription = "Travel banner",
-            contentScale = ContentScale.Crop,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier.fillMaxSize()
         )
     }
 }
